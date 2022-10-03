@@ -12,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.List;
+
 import static com.vladmihalcea.sql.SQLStatementCountValidator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,19 +61,146 @@ public class BookRepositoryTest {
         //Then
         assertThat(result.getPageCount()).isEqualTo(1000);
         assertThat(result.getTitle()).isEqualTo("test");
+        assertSelectCount(0);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Обновить книгу")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+          "classpath:sql/2_insert_person_data.sql",
+          "classpath:sql/3_insert_book_data.sql"
+    })
+    void updateBook_thenAssertDmlCount() {
+        //Given
+        Person person = new Person();
+        person.setAge(29);
+        person.setTitle("test title");
+        person.setFullName("Test Test");
+
+        Person savedPerson = userRepository.save(person);
+
+        Book book = new Book();
+        book.setAuthor("Test Author");
+        book.setTitle("test");
+        book.setPageCount(300);
+        book.setPerson(savedPerson);
+
+        //When
+        Book result = bookRepository.save(book);
+        result.setTitle("test2");
+        result.setPageCount(400);
+        result = bookRepository.save(result);
+
+        //Then
+        assertThat(result.getPageCount()).isEqualTo(400);
+        assertThat(result.getTitle()).isEqualTo("test2");
         assertSelectCount(2);
         assertInsertCount(0);
         assertUpdateCount(0);
         assertDeleteCount(0);
     }
 
-    // update
-    // get
-    // get all
-    // delete
+    @DisplayName("Получить книгу")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+          "classpath:sql/2_insert_person_data.sql",
+          "classpath:sql/3_insert_book_data.sql"
+    })
+    void getBook_thenAssertDmlCount() {
+        //Given
+        Person person = new Person();
+        person.setAge(29);
+        person.setTitle("test title");
+        person.setFullName("Test Test");
 
-    // * failed
+        Person savedPerson = userRepository.save(person);
 
+        Book book = new Book();
+        book.setAuthor("Test Author");
+        book.setTitle("test");
+        book.setPageCount(300);
+        book.setPerson(savedPerson);
 
-    // example failed test
+        //When
+        Book result = bookRepository.save(book);
+        result = bookRepository.findById(result.getId()).get();
+
+        //Then
+        assertThat(result.getPageCount()).isEqualTo(300);
+        assertThat(result.getTitle()).isEqualTo("test");
+        assertSelectCount(0);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Получить книги пользователя")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+          "classpath:sql/2_insert_person_data.sql",
+          "classpath:sql/3_insert_book_data.sql"
+    })
+    void getAllBook_thenAssertDmlCount() {
+        //Given
+
+        //When
+        List<Book> books = bookRepository.findAllByPersonId(1001L);
+
+        //Then
+        assertThat(books.get(0).getTitle()).isEqualTo("default book");
+        assertThat(books.get(0).getPageCount()).isEqualTo(5500);
+        assertThat(books.get(1).getTitle()).isEqualTo("more default book");
+        assertThat(books.get(1).getPageCount()).isEqualTo(6655);
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Удаление книги по id")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+          "classpath:sql/2_insert_person_data.sql",
+          "classpath:sql/3_insert_book_data.sql"
+    })
+    void deleteBook_thenAssertDmlCount() {
+        //Given
+
+        //When
+        bookRepository.deleteById(2002L);
+
+        //Then
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    // delete all
+    @DisplayName("Удаление книг пользователя")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+          "classpath:sql/2_insert_person_data.sql",
+          "classpath:sql/3_insert_book_data.sql"
+    })
+    void deleteAllBook_thenAssertDmlCount() {
+        //Given
+
+        //When
+        bookRepository.deleteByPersonId(1001L);
+
+        //Then
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
 }

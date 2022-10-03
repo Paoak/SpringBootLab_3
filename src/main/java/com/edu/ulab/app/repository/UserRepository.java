@@ -21,4 +21,7 @@ public interface UserRepository extends CrudRepository<Person, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Person p where p.id = :id")
     Optional<Person> findByIdForUpdate(long id);
+
+    boolean existsByTitle(String title);
+    Optional<Person> getByTitle(String title);
 }
