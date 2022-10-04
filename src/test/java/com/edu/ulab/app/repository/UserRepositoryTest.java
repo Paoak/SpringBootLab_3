@@ -45,16 +45,79 @@ public class UserRepositoryTest {
 
         //Then
         assertThat(result.getAge()).isEqualTo(111);
+        assertSelectCount(0);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Обновить юзера")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+          "classpath:sql/2_insert_person_data.sql",
+          "classpath:sql/3_insert_book_data.sql"
+    })
+    void updatePerson_thenAssertDmlCount() {
+        //Given
+
+        //When
+        Person result = userRepository.findById(1001L).get();
+        result.setTitle("test name");
+        result.setAge(15);
+        result = userRepository.save(result);
+
+        //Then
+        assertThat(result.getFullName()).isEqualTo("default uer");
+        assertThat(result.getTitle()).isEqualTo("test name");
+        assertThat(result.getAge()).isEqualTo(15);
         assertSelectCount(1);
         assertInsertCount(0);
         assertUpdateCount(0);
         assertDeleteCount(0);
     }
 
-    // update
-    // get
-    // get all
-    // delete
+    @DisplayName("Получить юзера")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+          "classpath:sql/2_insert_person_data.sql",
+          "classpath:sql/3_insert_book_data.sql"
+    })
+    void getPerson_thenAssertDmlCount() {
+        //Given
 
-    // * failed
+        //When
+        Person result = userRepository.findById(1001L).get();
+
+        //Then
+        assertThat(result.getFullName()).isEqualTo("default uer");
+        assertThat(result.getTitle()).isEqualTo("reader");
+        assertThat(result.getAge()).isEqualTo(55);
+        assertSelectCount(1); //1
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Удалить юзера")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+          "classpath:sql/2_insert_person_data.sql",
+          "classpath:sql/3_insert_book_data.sql"
+    })
+    void deletePerson_thenAssertDmlCount() {
+        //Given
+
+        //When
+        userRepository.deleteById(1001L);
+
+        //Then
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
 }
