@@ -1,2 +1,2 @@
-# SpringBootLab_3 testing tasks
+# SpringBootLab_3 testing API with DB tasks
 
